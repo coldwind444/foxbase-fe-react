@@ -1,0 +1,58 @@
+.email-container {
+    width: 500px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.email-title {
+    margin: 0px;
+}
+
+.email-box input {
+    line-height: 40px;
+    width: 80%;
+    padding-left: 20px;
+    outline: none;
+    border: none;
+    background-color: transparent;
+}
+
+.email-box {
+    line-height: 40px;
+    width: 400px;
+    border: solid 1px white;
+    border-radius: 10px;
+}
+
+.send-code-btn {
+    height: 40px;
+    width: 200px;
+    border-radius: 10px;
+    background-color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    gap: 10px;
+    transition: gap 0.2s ease;
+}
+
+.send-code-btn:hover {
+    background-color: white;
+    color: black;
+    gap: 60px;
+}
+
+.plane {
+    transition: transform 0.2s ease;
+}
+
+.send-code-btn:hover .plane{
+    transform: scale(1.5);
+}
