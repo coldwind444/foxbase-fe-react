@@ -234,6 +234,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     text-decoration: none;
+    font-weight: 700;
 }
 
 .home-signin-btn {
@@ -247,6 +248,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     text-decoration: none;
+    font-weight: 700;
 }
 
 .home-login-btn:hover {

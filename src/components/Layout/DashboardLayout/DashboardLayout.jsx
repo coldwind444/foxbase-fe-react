@@ -51,14 +51,13 @@ export default function DashboardLayout() {
                         <label className={clx('bold-text')}>My works</label>
                     </div>
                 </div>
-                <div className={clx('user-container')}>
-                    <label>Welcome back, Johny !</label>
+                <div className={clx('user-container')} ref={userPopupRef}>
                     <div className={clx('avatar')}></div>
                     <div className={clx('expand-btn')} onClick={handlePopupClick}>
                         <FontAwesomeIcon icon={faCaretDown} className={clx('spin-icon', { up: popupState })} />
                     </div>
+                    <UserPopup state={popupState} />
                 </div>
-                <UserPopup ref={userPopupRef} state={popupState} />
             </header>
             <div className={clx('content')}>
                 <WorkPage type={tab}/>

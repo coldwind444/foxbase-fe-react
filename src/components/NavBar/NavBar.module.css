@@ -38,14 +38,15 @@
 }
 
 .nav-area {
-    margin-left: 100px;
+    margin-left: 20px;
 }
 
 .nav-list {
     display: flex;
     width: 500px;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 60px;
 }
 
 .item {
@@ -156,6 +157,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     text-decoration: none;
+    font-weight: 700;
 }
 
 .home-signin-btn {
@@ -169,6 +171,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     text-decoration: none;
+    font-weight: 700;
 }
 
 .home-login-btn:hover {
