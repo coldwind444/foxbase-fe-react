@@ -11,15 +11,53 @@ import science from '../../assets/science.jpg'
 import history from '../../assets/history.jpg'
 import detective from '../../assets/detective.jpg'
 import art from '../../assets/art.jpg'
+import { useSearch, Filters } from '../../provider/SearchContext'
+import { useNavigate } from 'react-router-dom'
 
 const clx = classNames.bind(style)
 export default function ExplorePage() {
-    const filterRef = useRef(null)
+    const { result, setResult, toResultPage, setToResultPage, keyword, setKeyWord, filters, setFilters, page, setPage } = useSearch()
 
-    const [search, setSearch] = useState('')
+    const filterRef = useRef(null)
+    const navigate = useNavigate()
+
     const [clearable, setClearable] = useState(false)
-    const [selection, setSelection] = useState('All')
+    const [search, setSearch] = useState('')
     const [categoryPopupState, setCategoryPopupState] = useState(false)
+
+    const [keyWordFilter, setKeyWordFilter] = useState(Filters.TITLE)
+    const [typeGroup1, setTypeGroup1] = useState(null); 
+    const [typeGroup2, setTypeGroup2] = useState(null); 
+
+    const handleExtraFilter = (filter) => {
+        switch (filter) {
+            case Filters.FREE:
+            case Filters.COST:
+                setTypeGroup1(prev => (prev === filter ? null : filter));
+                break;
+            case Filters.COMMUNITY:
+            case Filters.OUTSOURCE:
+                setTypeGroup2(prev => (prev === filter ? null : filter));
+                break;
+        }
+    };
+
+    const handleCategoryPopupClick = () => {
+        setCategoryPopupState(prev => !prev)
+    }
+
+    const handleKW = (value) => {
+        setCategoryPopupState(false)
+        setKeyWordFilter(value)
+    }
+
+
+    const handleSearch = () => {
+        setKeyWord(search)
+        setFilters([keyWordFilter, typeGroup1, typeGroup2])
+        setToResultPage(true)
+        navigate("/explore/result")
+    }
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -41,15 +79,6 @@ export default function ExplorePage() {
         setClearable(search.length > 0)
     }, [search])
 
-    const handleCategoryPopupClick = () => {
-        setCategoryPopupState(prev => !prev)
-    }
-
-    const handleSelection = (value) => {
-        setCategoryPopupState(false)
-        setSelection(value)
-    }
-
     return (
         <div className={clx('wrapper')}>
             <div className={clx('title-container')}>
@@ -62,22 +91,43 @@ export default function ExplorePage() {
                     <span className={clx('clear-btn', { visible: clearable })} onClick={() => setSearch('')}>
                         <FontAwesomeIcon icon={faXmark} />
                     </span>
-                    <span className={clx('search-btn')}>
+                    <span className={clx('search-btn')} onClick={() => handleSearch()}>
                         <FontAwesomeIcon className={clx('search-icon')} icon={faSearch} />
                     </span>
                 </div>
                 <div className={clx('filter')} ref={filterRef}>
-                    <label>{selection}</label>
+                    <label className={clx('bold')}>{keyWordFilter}</label>
                     <FontAwesomeIcon icon={faLayerGroup} />
                     <span className={clx('filter-expand-btn')} onClick={handleCategoryPopupClick} >
                         <FontAwesomeIcon className={clx('spin-icon', { up: categoryPopupState })} icon={faChevronDown} />
                     </span>
                     <div className={clx('option-popup', { open: categoryPopupState })}>
-                        <span className={clx('option')} onClick={() => handleSelection('All')}>All</span>
-                        <span className={clx('option')} onClick={() => handleSelection('Genre')}>Genre</span>
-                        <span className={clx('option')} onClick={() => handleSelection('Price')}>Price</span>
-                        <span className={clx('option')} onClick={() => handleSelection('Author')}>Author</span>
+                        <span className={clx('option')} onClick={() => handleKW(Filters.TITLE)}>TITLE</span>
+                        <span className={clx('option')} onClick={() => handleKW(Filters.GENRE)}>GENRE</span>
+                        <span className={clx('option')} onClick={() => handleKW(Filters.AUTHOR)}>AUTHOR</span>
                     </div>
+                </div>
+            </div>
+            <div className={clx('types-container')}>
+                <div
+                    className={clx('type', typeGroup1 === Filters.FREE && 'active')}
+                    onClick={() => handleExtraFilter(Filters.FREE)}>
+                    Free books
+                </div>
+                <div
+                    className={clx('type', typeGroup1 === Filters.COST && 'active')}
+                    onClick={() => handleExtraFilter(Filters.COST)}>
+                    Cost books
+                </div>
+                <div
+                    className={clx('type', typeGroup2 === Filters.COMMUNITY && 'active')}
+                    onClick={() => handleExtraFilter(Filters.COMMUNITY)}>
+                    Community books
+                </div>
+                <div
+                    className={clx('type', typeGroup2 === Filters.OUTSOURCE && 'active')}
+                    onClick={() => handleExtraFilter(Filters.OUTSOURCE)}>
+                    Outsource books
                 </div>
             </div>
             <div className={clx('slider-container')}>

@@ -1,7 +1,7 @@
 .popup {
     background-color: white;
     position: absolute;
-    height: 260px;
+    height: 280px;
     width: 320px;
     right: 0;
     transform: translateY(170px) translateX(-20px);
@@ -37,6 +37,13 @@
     border-radius: 50%;
     position: absolute;
     transform: translateX(20px) translateY(30px);
+    overflow: hidden;
+}
+
+.header-avatar img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
 }
 
 .avatar-edit {
@@ -71,7 +78,7 @@
 
 .info-area {
     display: flex;
-    padding-left: 110px;
+    padding-left: 90px;
     padding-top: 20px;
     gap: 20px;
 }
@@ -84,14 +91,14 @@
 }
 
 .item-text {
-    font-weight: 800;
+    font-weight: 700;
     font-size: 20px;
     margin-top: 5px;
 }
 
 .item-icon {
     aspect-ratio: 1/1;
-    height: 30px;
+    height: 20px;
 }
 
 .green-text {
@@ -127,15 +134,16 @@
 }
 
 .actions {
-    gap: 5px;
     display: flex;
     flex-direction: column;
     width: 50%;
+    height: 100%;
 }
 
 .action {
     display: flex;
     align-items: center;
+    flex: 1;
     gap: 10px;
     cursor: pointer;
     padding: 5px 0px;
@@ -171,7 +179,7 @@
 
 .slider {
     width: 200%;
-    height: 105px;
+    height: 125px;
     display: flex;
     transition: transform 0.2s ease;
 }
@@ -256,4 +264,24 @@
 .back-btn:hover,
 .confirm-btn:hover {
     opacity: 0.9;
+}
+
+.purchase {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.amount-container {
+    display: flex;
+    gap: 10px;
+    margin-left: 5px;
+}
+
+.amount-label {
+    font-weight: 600;
+}
+
+.red-text {
+    color: var(--red)
 }

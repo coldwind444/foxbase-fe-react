@@ -4,21 +4,55 @@ import UserPopup from '../UserPopup/UserPopup'
 import { useState, useEffect, useRef } from 'react'
 import logo from '../../assets/fox.png'
 import { Fragment } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCaretDown, faChevronDown, faLayerGroup, faSearch, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { useAuth } from '../../provider/AuthContext'
+import foxAvatar from '../../assets/default_avt.jpg'
+import { Filters, useSearch } from '../../provider/SearchContext'
 
 const clx = classNames.bind(style)
-export default function ExploreNavBar({ isAuthenticated, userInfo, hasSearchBox }) {
+export default function ExploreNavBar() {
+    const {
+        authenticated,
+        userRegister,
+        login,
+        logout,
+        loading,
+        loginContext,
+        setLoginContext,
+        jwt,
+        setJwt,
+        userInfo,
+        setUserInfo
+    } = useAuth()
+
+    const { result, setResult, toResultPage, setToResultPage, keyword, setKeyWord, filters, setFilters, page, setPage } = useSearch()
+
     const [popupState, setPopupState] = useState(false)
     const [scrolled, setScrolled] = useState(false);
+    const [clearable, setClearable] = useState('')
     const [search, setSearch] = useState('')
-    const [clearable, setClearable] = useState(false)
-    const [selection, setSelection] = useState('All')
     const [categoryPopupState, setCategoryPopupState] = useState(false)
 
     const filterRef = useRef(null)
     const userPopupRef = useRef(null)
+
+    const location = useLocation()
+
+
+    const handlePopupClick = () => {
+        setPopupState(prev => !prev)
+    }
+
+    useEffect(() => {
+        if (location.pathname === "/explore") {
+            setToResultPage(false)
+        } else if (location.pathname === "/explore/result") {
+            setToResultPage(true)
+        }
+    }, [location.pathname])
+
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -65,67 +99,44 @@ export default function ExploreNavBar({ isAuthenticated, userInfo, hasSearchBox 
         setClearable(search.length > 0)
     }, [search])
 
-    const handlePopupClick = () => {
-        setPopupState(prev => !prev)
-    }
-
-    const handleCategoryPopupClick = () => {
-        setCategoryPopupState(prev => !prev)
-    }
-
-    const handleSelection = (value) => {
-        setCategoryPopupState(false)
-        setSelection(value)
-    }
-
     return (
         <div className={clx({ 'nav-bar': true, 'black-bg': scrolled })}>
             <div className={clx('logo-area')}>
                 <img src={logo} className={clx('web-logo')} />
                 <label className={clx('logo-label')}>Foxbase</label>
             </div>
-           {hasSearchBox && <div className={clx('search-area')}>
-               <div className={clx('search-box')}>
-                    <input type='text' placeholder='What are you looking for ?' onChange={(e) => setSearch(e.target.value)} value={search} />
-                    <span className={clx('clear-btn', { visible: clearable })} onClick={() => setSearch('')}>
-                        <FontAwesomeIcon icon={faXmark} />
-                    </span>
-                    <span className={clx('search-btn')}>
-                        <FontAwesomeIcon className={clx('search-icon')} icon={faSearch} />
-                    </span>
-                </div>
-                <div className={clx('filter')} ref={filterRef}>
-                    <label>{selection}</label>
-                    <FontAwesomeIcon icon={faLayerGroup} />
-                    <span className={clx('filter-expand-btn')} onClick={handleCategoryPopupClick} >
-                        <FontAwesomeIcon className={clx('spin-icon', { up: categoryPopupState })} icon={faChevronDown} />
-                    </span>
-                    <div className={clx('option-popup', { open: categoryPopupState })}>
-                        <span className={clx('option')} onClick={() => handleSelection('All')}>All</span>
-                        <span className={clx('option')} onClick={() => handleSelection('Genre')}>Genre</span>
-                        <span className={clx('option')} onClick={() => handleSelection('Price')}>Price</span>
-                        <span className={clx('option')} onClick={() => handleSelection('Author')}>Author</span>
+            {toResultPage &&
+                <div className={clx('search-area')}>
+                    <div className={clx('search-box')}>
+                        <input type='text' placeholder='What are you looking for ?' onChange={(e) => setSearch(e.target.value)} value={search} />
+                        <span className={clx('clear-btn', { visible: clearable })} onClick={() => setSearch('')}>
+                            <FontAwesomeIcon icon={faXmark} />
+                        </span>
+                        <span className={clx('search-btn')} onClick={() => setKeyWord(search)}>
+                            <FontAwesomeIcon className={clx('search-icon')} icon={faSearch} />
+                        </span>
                     </div>
-                </div>
-           </div>}
+                </div>}
             <div className={clx('nav-area')}>
                 <ul className={clx('nav-list')}>
                     <li className={clx('item')}><Link to='/' className={clx('link')}>Home</Link></li>
-                    <li className={clx('item')}><Link to='/' className={clx('link')}>Explore</Link></li>
-                    <li className={clx('item')}><Link to='/dashboard' className={clx('link')}>Dashboard</Link></li>
+                    <li className={clx('item')}><Link to='/explore' className={clx('link')}>Explore</Link></li>
+                    <li className={clx('item')}><Link to={userInfo ? '/dashboard' : 'auth/login'} className={clx('link')}>Dashboard</Link></li>
                 </ul>
             </div>
             <div className={clx('auth-area')} ref={userPopupRef}>
-                {isAuthenticated ? (
+                {authenticated ? (
                     <Fragment>
-                        <div className={clx('avatar')} />
+                        <div className={clx('avatar')}>
+                            <img src={userInfo.avatarUrl ? userInfo.avatarUrl : foxAvatar} />
+                        </div>
                         <div className={clx('expand-btn')} onClick={handlePopupClick}>
                             <FontAwesomeIcon
                                 className={clx('spin-icon', { up: popupState })}
                                 icon={faCaretDown}
                             />
                         </div>
-                        <UserPopup userInfo={userInfo} state={popupState} />
+                        <UserPopup state={popupState} />
                     </Fragment>
                 ) : (
                     <Fragment>

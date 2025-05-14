@@ -2,29 +2,40 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import style from './Book.module.css'
 import classNames from 'classnames/bind'
 import { faGift, faCartShopping, faBookOpen, faHeart as faHearSolid } from '@fortawesome/free-solid-svg-icons'
-import { faHeart as faHeartOutlined } from '@fortawesome/free-regular-svg-icons'
-import { useState } from 'react'
+import { useBook } from '../../provider/BookContext'
+import { useNavigate } from 'react-router-dom'
 
 const clx = classNames.bind(style)
-function Book({name, price}){
+function Book({ book }){
+    const { id, setId, bookData , setBookData, bookLoading } = useBook()
+    const navigate = useNavigate()
+    
+    const handleBookDetailView = () => {
+        setId(book.bookId)
+        setBookData(book)
+        navigate("/book/detail")
+    }
+
     return (
         <div className={clx('wrapper')}>
             <div className={clx('cover')}>
                 <div className={clx('stamp')}>
-                    <div className={clx({'stamp-type' : true, 'free': price === 'FREE', 'cost' : price !== 'FREE'})}>{price}</div>
+                    <div className={clx({'stamp-type' : true, 'free': book.price === 0, 'cost' : book.price !== 0})}>{book.price > 0 ? book.price.toLocaleString() + "đ" : "FREE"}</div>
                     <div className={clx('stamp-icon-container')}>
-                        <FontAwesomeIcon className={clx({'stamp-icon' : true, 'free-lb': price === 'FREE', 'cost-lb' : price !== 'FREE'})}
-                                         icon={price === 'FREE' ? faGift : faCartShopping}/>
+                        <FontAwesomeIcon className={clx({'stamp-icon' : true, 'free-lb': book.price === 0, 'cost-lb' : book.price !== 0})}
+                                         icon={book.price === 0 ? faGift : faCartShopping}/>
                     </div>
                 </div>
                 <div className={clx('overlay')}>
-                    <div className={clx({'read-btn' : true, 'free-read': price === 'FREE', 'cost-read': price !== 'FREE'})}>
-                        <FontAwesomeIcon className={clx('read-btn-icon')} icon={price === 'FREE' ? faBookOpen : faCartShopping}/>
-                        <label>{price === 'FREE' ? 'Read' : 'Buy'}</label>
+                    <div className={clx({'read-btn' : true, 'free-read': book.price === 0, 'cost-read': book.price !== 0})}
+                        onClick={() => handleBookDetailView()}>
+                        <FontAwesomeIcon className={clx('read-btn-icon')} icon={book.price === 0 ? faBookOpen : faCartShopping}/>
+                        <label>{book.price === 0 ? 'Read' : 'Buy'}</label>
                     </div>
                 </div>
+                <img className={clx('cover-image')} src={book.imageUrl}/>
             </div>
-            <label className={clx('book-title')}>{name}</label>
+            <label className={clx('book-title')}>{book.title}</label>
         </div>
     )
 }

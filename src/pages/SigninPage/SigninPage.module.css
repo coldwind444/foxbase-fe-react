@@ -28,12 +28,15 @@
     font-size: 20px;
     font-weight: 700;
     color: white;
-    margin-top: -10px;
     transition: background-color 0.1s ease;
 }
 
 .signup-btn:hover {
     background-color: white;
+    color: var(--secondary-orange);
+}
+
+.signup-btn:hover + .loader-container {
     color: var(--secondary-orange);
 }
 
@@ -59,3 +62,58 @@
 .login-link:hover {
     gap: 20px;
 }
+
+.info-container {
+    width: 420px;
+    height: fit-content;
+    overflow: hidden;
+}
+
+.slider {
+    height: fit-content;
+    width: 200%;
+    display: flex;
+    gap: 50px;
+    transition: transform 0.3s ease;
+}
+
+.next {
+    transform: translateX(-53%);
+}
+
+.step-container {
+    height: fit-content;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.next-btn {
+    background-color: var(--green);
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: gap 0.2s ease, background-color 0.2s ease;
+    height: 50px;
+    width: 400px;
+    border-radius: 10px;
+    gap: 20px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.next-btn:hover {
+    background-color: white;
+    color: var(--green);
+    gap: 50px;
+}
+
+.loader-container {
+    position: absolute;
+    transform: translateX(350px) translateY(368px);
+    color: white;
+}
+

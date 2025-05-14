@@ -5,11 +5,17 @@ import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useState, useEffect } from 'react'
 
 const clx = classNames.bind(style)
-function PasswordReqList({ password, confirm }) {
+function PasswordReqList({ password, confirm, onValidityChange }) {
     const [validNumOfChar, setValidNumOfChar] = useState(false)
     const [hasCapLetterAndDigit, setHasCapLetterAndDigit] = useState(false)
     const [hasSpecChar, setHasSpecChar] = useState(false)
     const [matchPassword, setMatchPassword] = useState(false)
+
+    useEffect(() => {
+        const isValid = validNumOfChar && hasCapLetterAndDigit && hasSpecChar && matchPassword
+        onValidityChange?.(isValid)
+    }, [validNumOfChar, hasCapLetterAndDigit, hasSpecChar, matchPassword])
+
 
     useEffect(() => {
         var capletters = 0

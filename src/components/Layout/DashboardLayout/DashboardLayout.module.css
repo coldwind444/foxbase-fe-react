@@ -99,6 +99,13 @@
     height: 50px;
     background-color: var(--orange);
     border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
 }
 
 .expand-btn {
@@ -389,3 +396,4 @@
     flex-grow: 1;
     overflow: hidden;
 }
+

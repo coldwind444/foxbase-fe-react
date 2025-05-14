@@ -5,7 +5,7 @@
     --orange: rgb(251, 143, 12);
     --secondary-orange: #FD6C0A;
     --light: rgba(255, 255, 255, 0.3);
-    --green: rgb(41, 171, 135);
+    --green: #29ab87;
     --blue: #32ADE6;
     --golden: #ebc351;
     --dark-green: hsl(97, 45%, 31%);
@@ -32,6 +32,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   display: none;
 }
 
+input[type="radio"] {
+    accent-color: var(--secondary-orange);
+}
+
 label {
     user-select: none;
     cursor: pointer;
@@ -39,4 +43,10 @@ label {
 
 button {
     border: none;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #121212 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

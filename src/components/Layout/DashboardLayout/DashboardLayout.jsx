@@ -5,12 +5,28 @@ import classNames from 'classnames/bind'
 import foxLogo from '../../../assets/fox.png'
 import { useRef, useState, useEffect } from 'react'
 import { faFolderOpen } from '@fortawesome/free-regular-svg-icons'
-import { faCaretDown, faArrowLeft, faFeatherPointed, faPen, faKey, faMoneyCheckDollar, faRightFromBracket, faCheckCircle } from '@fortawesome/free-solid-svg-icons'
+import { faCaretDown, faFeatherPointed } from '@fortawesome/free-solid-svg-icons'
 import WorkPage from '../../../pages/WorkPage/WorkPage'
 import UserPopup from '../../UserPopup/UserPopup'
+import { useAuth } from '../../../provider/AuthContext'
 
 const clx = classNames.bind(style)
 export default function DashboardLayout() {
+    const {
+        authenticated,
+        userRegister,
+        login,
+        logout,
+        loading,
+        message,
+        setMessage,
+        jwt,
+        setJwt,
+        userInfo,
+        setUserInfo
+
+    } = useAuth()
+
     const [popupState, setPopupState] = useState(false)
     const [tab, setTab] = useState(1)
 
@@ -36,23 +52,27 @@ export default function DashboardLayout() {
         setPopupState(prev => !prev)
     }
 
+    if (loading || userInfo === null) return (<div></div>)
+
     return (
         <div className={clx('wrapper')}>
             <header className={clx('dashboard-header')}>
                 <div className={clx('tab-control')}>
                     <Link to='/'><img src={foxLogo} className={clx('fox-tab-logo')} /></Link>
                     <label className={clx('bold-text', 'right-space', 'white-text')}>DASHBOARD</label>
-                    <div className={clx('expanded-tab-btn', {'active' : tab === 1})} onClick={() => setTab(1)}>
+                    <div className={clx('expanded-tab-btn', { 'active': tab === 1 })} onClick={() => setTab(1)}>
                         <FontAwesomeIcon icon={faFolderOpen} className={clx('tab-btn-icon')} />
                         <label className={clx('bold-text')}>My collection</label>
                     </div>
-                    <div className={clx('expanded-tab-btn', {'active' : tab === 2})}>
-                        <FontAwesomeIcon icon={faFeatherPointed} className={clx('tab-btn-icon')} onClick={() => setTab(2)}/>
+                    <div className={clx('expanded-tab-btn', { 'active': tab === 2 })}>
+                        <FontAwesomeIcon icon={faFeatherPointed} className={clx('tab-btn-icon')} onClick={() => setTab(2)} />
                         <label className={clx('bold-text')}>My works</label>
                     </div>
                 </div>
                 <div className={clx('user-container')} ref={userPopupRef}>
-                    <div className={clx('avatar')}></div>
+                    <div className={clx('avatar')}>
+                        <img src={userInfo.avatarUrl} />
+                    </div>
                     <div className={clx('expand-btn')} onClick={handlePopupClick}>
                         <FontAwesomeIcon icon={faCaretDown} className={clx('spin-icon', { up: popupState })} />
                     </div>
@@ -60,7 +80,7 @@ export default function DashboardLayout() {
                 </div>
             </header>
             <div className={clx('content')}>
-                <WorkPage type={tab}/>
+                <WorkPage type={tab} />
             </div>
         </div>
     )

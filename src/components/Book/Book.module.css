@@ -13,11 +13,17 @@
     border-radius: 15px;
     display: flex;
     justify-content: right;
-    background-image: url('../../assets/HP.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
     position: relative;
     cursor: pointer;
+    overflow: hidden;
+}
+
+.cover-image {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: 0;
 }
 
 .overlay {
@@ -84,9 +90,10 @@
 
 .stamp {
     height: 50px;
-    width: 70%;
+    width: 90%;
     display: flex;
     justify-content: right;
+
 }
 
 .free-lb {
@@ -107,15 +114,15 @@
 
 .stamp-type {
     height: 30px;
-    width: 100px;
+    width: 200px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: 700;
     border-radius: 0px 0px 0px 20px;
-    z-index: 0;
-    margin-right: -20px;
+    z-index: 1;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    margin-right: -20px;
     color: white;
 }
 

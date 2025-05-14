@@ -4,7 +4,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    margin-top: 250px;
     gap: 20px;
 }
 
@@ -46,13 +47,53 @@
 .send-code-btn:hover {
     background-color: white;
     color: black;
-    gap: 60px;
+    gap: 20px;
 }
 
 .plane {
     transition: transform 0.2s ease;
 }
 
-.send-code-btn:hover .plane{
+.send-code-btn:hover .plane {
     transform: scale(1.5);
+}
+
+.error-label {
+    color: var(--red);
+    margin-top: 30px;
+}
+
+.progress-bar {
+    height: 5px;
+    width: 250px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.value {
+    height: 5px;
+    width: 250px;
+    background-color: var(--red);
+}
+
+.run {
+    animation: decrease 5s linear;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+@keyframes decrease {
+    0% {
+        width: 100%;
+    }
+
+    100% {
+        width: 0%;
+    }
+}
+
+.loader-container {
+    position: absolute;
+    transform: translate(150px, 200px);
 }

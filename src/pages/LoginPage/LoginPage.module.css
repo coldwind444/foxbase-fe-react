@@ -28,7 +28,14 @@
     text-decoration: none;
 }
 
+.reset-pw-link:hover {
+    text-decoration: underline;
+}
+
 .login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 50px;
     width: 400px;
     border-radius: 10px;
@@ -68,6 +75,7 @@
     align-items: center;
     transition: opacity 0.1s ease;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .third-party-auth-button:hover {
@@ -115,4 +123,13 @@
     color: var(--orange);
     aspect-ratio: 1/1;
     height: 20px;
+}
+
+.loader-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    transform: translate(-150px, 45px);
+    color: black;
 }

@@ -200,10 +200,12 @@
     width: 94%;
     color: rgba(255, 255, 255, 0.7);
     font-weight: 600;
+    text-align: justify;
+    height: 120px;
+    max-height: 120px;
 }
 
 .actions {
-    margin-top: 80px;
     display: flex;
     gap: 10px;
 }
@@ -219,6 +221,7 @@
     border-radius: 25px;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
 }
 
 .scale-icon {

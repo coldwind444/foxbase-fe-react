@@ -48,7 +48,6 @@
     margin-top: 20px;
     width: 380px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
 }
 
@@ -64,6 +63,7 @@
     font-weight: 600;
     transition: background-color 0.2s ease;
     cursor: pointer;
+    margin-right: auto;
 }
 
 .resend-btn:hover {
@@ -82,4 +82,5 @@
 
 .expire-label {
     color: var(--red);
+    margin-left: auto;
 }

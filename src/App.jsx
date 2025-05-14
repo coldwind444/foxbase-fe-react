@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import DefaultLayout from './components/Layout/DefaultLayout/DefaultLayout'
 import BooksPage from './pages/BooksPage/BooksPage'
 import AuthLayout from './components/Layout/AuthLayout/AuthLayout'
@@ -10,8 +10,15 @@ import DashboardLayout from './components/Layout/DashboardLayout/DashboardLayout
 import ExploreLayout from './components/Layout/ExploreLayout/ExploreLayout'
 import ExplorePage from './pages/ExplorePage/ExplorePage'
 import ResultPage from './pages/ResultPage/ResultPage'
+import { useEffect } from 'react'
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [location.pathname]); 
+
   return (
     <div>
         <Routes>
@@ -19,10 +26,10 @@ function App() {
           <Route path='/auth/login' element={<AuthLayout context='login'><LoginPage/></AuthLayout>}/>
           <Route path='/auth/signin' element={<AuthLayout context='signup'><SigninPage/></AuthLayout>}/>
           <Route path='/auth/reset-password' element={<AuthLayout context='reset'><ResetPasswordPage/></AuthLayout>}/>
-          <Route path='/book/detail' element={<DefaultLayout><BookDetailPage price={'$20'}/></DefaultLayout>}/>
+          <Route path='/book/detail' element={<DefaultLayout><BookDetailPage/></DefaultLayout>}/>
           <Route path='/dashboard' element={<DashboardLayout></DashboardLayout>}/>
           <Route path='/explore' element={<ExploreLayout><ExplorePage/></ExploreLayout>}/>
-          <Route path='/explore/result' element={<ExploreLayout hasSearchBox={true}><ResultPage/></ExploreLayout>}/>
+          <Route path='/explore/result' element={<ExploreLayout><ResultPage/></ExploreLayout>}/>
         </Routes>
     </div>
   )

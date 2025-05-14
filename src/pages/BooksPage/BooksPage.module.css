@@ -54,3 +54,22 @@
     background-color: royalblue;
     gap: 20px;
 }
+
+.not-found-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-left: 50px;
+}
+
+.empty-label {
+    font-size: 40px;
+    color: rgba(255,255,255,0.5);
+}
+
+.box-icon {
+    color: rgba(255,255,255,0.5);
+    aspect-ratio: 1/1;
+    height: 100px;
+}

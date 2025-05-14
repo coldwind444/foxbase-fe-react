@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState, useImperativeHandle } from 'react'
 import classNames from 'classnames/bind'
 import style from './OTPBox.module.css'
 
 const clx = classNames.bind(style)
 
-function OTPBox({ code = '', onChange }) {
+const OTPBox = forwardRef(({ code = '', onChange }, ref) => {
     const length = 6
     const [otp, setOtp] = useState(Array(length).fill(''))
     const inputRefs = useRef([])
@@ -14,6 +14,13 @@ function OTPBox({ code = '', onChange }) {
             onChange(otp.join(''))
         }
     }, [otp, onChange])
+
+    useImperativeHandle(ref, () => ({
+        reset: () => {
+            setOtp(Array(length).fill(''))
+            inputRefs.current[0]?.focus()
+        }
+    }))
 
     const handleChange = (value, index) => {
         if (!/^[0-9]$/.test(value)) return
@@ -60,6 +67,6 @@ function OTPBox({ code = '', onChange }) {
             ))}
         </div>
     )
-}
+})
 
 export default OTPBox

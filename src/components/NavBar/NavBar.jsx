@@ -7,10 +7,25 @@ import { Link, useNavigate } from 'react-router-dom'
 import style from './NavBar.module.css'
 import classNames from 'classnames/bind'
 import UserPopup from '../UserPopup/UserPopup'
+import { useAuth } from '../../provider/AuthContext'
 
 const clx = classNames.bind(style)
 
-function NavBar({ isAuthenticated, userInfo}) {
+function NavBar() {
+    const {
+        authenticated,
+        userRegister,
+        login,
+        logout,
+        loading,
+        loginContext,
+        setLoginContext,
+        jwt,
+        setJwt,
+        userInfo,
+        setUserInfo
+    } = useAuth()
+
     const [popupState, setPopupState] = useState(false)
     const [scrolled, setScrolled] = useState(false);
 
@@ -56,26 +71,22 @@ function NavBar({ isAuthenticated, userInfo}) {
                 <ul className={clx('nav-list')}>
                     <li className={clx('item')}><Link to='/' className={clx('link')}>Home</Link></li>
                     <li className={clx('item')}><Link to='/explore' className={clx('link')}>Explore</Link></li>
-                    <li className={clx('item')}><Link to='/dashboard' className={clx('link')}>Dashboard</Link></li>
+                    <li className={clx('item')}><Link to={userInfo ? '/dashboard' : 'auth/login'} className={clx('link')}>Dashboard</Link></li>
                 </ul>
             </div>
-            <div className={clx('search-box')}>
-                <input type='text' placeholder='Search...' />
-                <span className={clx('search-btn')}>
-                    <FontAwesomeIcon className={clx('search-icon')} icon={faSearch} />
-                </span>
-            </div>
             <div className={clx('auth-area')} ref={userPopupRef}>
-                {isAuthenticated ? (
+                {authenticated ? (
                     <Fragment>
-                        <div className={clx('avatar')} />
+                        <div className={clx('avatar')}>
+                            <img src={userInfo.avatarUrl} />
+                        </div>
                         <div className={clx('expand-btn')} onClick={handlePopupClick}>
                             <FontAwesomeIcon
                                 className={clx('spin-icon', { up: popupState })}
                                 icon={faCaretDown}
                             />
                         </div>
-                        <UserPopup userInfo={userInfo} state={popupState}/>
+                        <UserPopup state={popupState} />
                     </Fragment>
                 ) : (
                     <Fragment>
