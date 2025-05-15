@@ -20,20 +20,7 @@ export const Messages = Object.freeze({
 });
 
 function FoxCharacter() {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-
-    } = useAuth()
+    const { message } = useAuth()
 
     return (
         <div className={clx('fox')}>

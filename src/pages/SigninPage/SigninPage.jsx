@@ -14,20 +14,7 @@ import { Messages } from '../../components/FoxCharacter/FoxCharacter'
 const clx = classNames.bind(style)
 
 function SigninPage() {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-
-    } = useAuth()
+    const { userRegister, loading, setMessage } = useAuth()
 
     const navigate = useNavigate()
 

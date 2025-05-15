@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 
 const clx = classNames.bind(style)
 export default function ExplorePage() {
-    const { result, setResult, toResultPage, setToResultPage, keyword, setKeyWord, filters, setFilters, page, setPage } = useSearch()
+    const { setToResultPage, setKeyWord, setFilters } = useSearch()
 
     const filterRef = useRef(null)
     const navigate = useNavigate()

@@ -13,19 +13,7 @@ import { Filters, useSearch } from '../../provider/SearchContext'
 
 const clx = classNames.bind(style)
 export default function ExploreNavBar() {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        loginContext,
-        setLoginContext,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-    } = useAuth()
+    const { authenticated, userInfo } = useAuth()
 
     const { result, setResult, toResultPage, setToResultPage, keyword, setKeyWord, filters, setFilters, page, setPage } = useSearch()
 

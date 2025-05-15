@@ -14,7 +14,7 @@ function BooksPage() {
     const [costBooks, setCostBooks] = useState([])
     const [commBooks, setCommBooks] = useState([])
 
-    const { result, setResult, toResultPage, setToResultPage, keyword, setKeyWord, filters, setFilters, page, setPage } = useSearch()
+    const { setKeyWord, setFilters, setPage } = useSearch()
     const navigate = useNavigate()
 
     const handleSeeMore = (ctx) => {

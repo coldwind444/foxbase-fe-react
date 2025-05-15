@@ -1,31 +1,33 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import style from './WorkPage.module.css'
 import classNames from 'classnames/bind'
-import { faArrowLeft, faBookOpen, faDownload, faEraser, faImage, faLessThan, faPaperclip, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faBookOpen, faBoxOpen, faDownload, faEraser, faImage, faLessThan, faPaperclip, faPlus, faXmark } from '@fortawesome/free-solid-svg-icons'
 import RateStars from '../../components/RateStars/RateStars'
-import cover from '../../assets/dream.jpg'
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../provider/AuthContext'
-import { getMyFavorites } from '../../api/bookApi'
+import { useLocation } from 'react-router-dom'
+import { useBook } from '../../provider/BookContext'
 
 const clx = classNames.bind(style)
 export default function WorkPage({ type }) {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
+    const { loading, userInfo } = useAuth()
 
-    } = useAuth()
+    const {
+        favorites,
+        setFavorites,
+        works,
+        isEmptyF,
+        setIsEmptyF,
+        isEmptyW,
+        setIsEmptyW,
+        fLoading,
+        wLoading,
+        removeItem
+    } = useBook()
 
     const fileInputRef = useRef()
+    const [imgFile, setImgFile] = useState(null)
+    const [previewUrl, setPreviewUrl] = useState(null)
     const [fileName, setFileName] = useState('No file chosen')
 
     const [tab, setTab] = useState(1)
@@ -37,8 +39,6 @@ export default function WorkPage({ type }) {
     const [genre, setGenre] = useState('')
     const [price, setPrice] = useState('')
     const [description, setDescription] = useState('')
-    const [books, setBooks] = useState([])
-    const [bookLoading, setBookLoading] = useState(false)
 
     const imageInputRef = useRef(null)
 
@@ -55,6 +55,19 @@ export default function WorkPage({ type }) {
         imageInputRef.current.click()
     }
 
+    const handleImgFileChange = (e) => {
+        const file = e.target.files[0];
+        setImgFile(file ? file.name : null)
+
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewUrl(objectUrl);
+    }
+
+    const clearImg = () => {
+        setImgFile(null)
+        setPreviewUrl(null)
+    }
+
     useEffect(() => {
         setTitleCount(title.length)
     }, [title])
@@ -64,22 +77,9 @@ export default function WorkPage({ type }) {
     }, [description])
 
     useEffect(() => {
-        const fetchFavorites = async () => {
-            try {
-                setBookLoading(true)
-                const response = await getMyFavorites(jwt)
-                console.log(response)
-                setBooks(response.data)
-            } catch {
-                console.log('Error fetching favorites')
-            } finally {
-                setBookLoading(false)
-            }
-        }
-
-        if (jwt) fetchFavorites()
-
-    }, [jwt])
+        if (type === 1 && !fLoading) setIsEmptyF(favorites.length === 0)
+        if (type === 2 && !wLoading) setIsEmptyW(works.length === 0)
+    }, [type])
 
     if (loading || userInfo === null) return (<div></div>)
 
@@ -106,60 +106,82 @@ export default function WorkPage({ type }) {
                         </div>
                         <div className={clx('seperator')}></div>
                     </div>
-                    <div className={clx('list')}>
-                        {!bookLoading && books.map((book, index) => (
-                            <Fragment key={index}>
-                                <div className={clx('book-record', { 'expanded': book.isExpanded })} onClick={() => {
-                                    setBooks(prevBooks =>
-                                        prevBooks.map((b, i) =>
-                                            i === index ? { ...b, isExpanded: !b.isExpanded } : b
-                                        )
-                                    );
-                                }}>
-                                    <div className={clx('record-info')}>
-                                        <label className={clx('record-label', 'record-id-space')}>{book.bookId}</label>
-                                        <label className={clx('record-label', 'record-title-space', 'orange')}>{book.title}</label>
-                                        <label className={clx('record-label', 'record-genre-space', 'yellow')}>{book.genre}</label>
-                                        <label className={clx('record-label', 'record-normal-space', { 'pink': book.price > 0, 'green': book.price === 0 })}>
-                                            {book.price > 0 ? book.price.toLocaleString() + 'đ' : 'FREE'}
-                                        </label>
-                                        <div className={clx('rate-container', 'record-normal-space')}>
-                                            <label className={'record-label'}>{book.averageRating}</label>
-                                            <RateStars rate={book.averageRating} />
+                    {!(type === 1 ? isEmptyF : isEmptyW) ?
+                        (<div className={clx('list')}>
+                            {!(type === 1 ? fLoading : wLoading) && (type === 1 ? favorites : works).map((book, index) => (
+                                <Fragment key={index}>
+                                    <div className={clx('book-record', { 'expanded': book.isExpanded })} onClick={() => {
+                                        setFavorites(prevfavorites =>
+                                            prevfavorites.map((b, i) =>
+                                                i === index ? { ...b, isExpanded: !b.isExpanded } : b
+                                            )
+                                        );
+                                    }}>
+                                        <div className={clx('record-info')}>
+                                            <label className={clx('record-label', 'record-id-space')}>{book.bookId}</label>
+                                            <label className={clx('record-label', 'record-title-space', 'orange')}>{book.title}</label>
+                                            <label className={clx('record-label', 'record-genre-space', 'yellow')}>{book.genre}</label>
+                                            <label className={clx('record-label', 'record-normal-space', { 'cross': book.price > 0, 'pink': book.price > 0, 'green': book.price === 0 })}>
+                                                {book.price > 0 ? book.price.toLocaleString() + 'đ' : 'FREE'}
+                                            </label>
+                                            <div className={clx('rate-container', 'record-normal-space')}>
+                                                <label className={'record-label'}>{book.averageRating === null ? '0.0' : book.averageRating.toFixed(1)}</label>
+                                                <RateStars rate={book.averageRating} />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className={clx('book-info')}>
-                                        <img src={book.imageUrl} className={clx('book-cover')} />
-                                        <div className={clx('description-container')}>
-                                            <label className={clx('d-title')}>DESCRIPTION</label>
-                                            <p className={clx('d-content')}>{book.description}</p>
-                                            <div className={clx('actions')}>
-                                                <a className={clx('action')} href={book.contentUrl}>
-                                                    <FontAwesomeIcon className={clx('blue', 'scale-icon')} icon={faDownload} />
-                                                    <label className={clx('blue')}>Download</label>
-                                                </a>
-                                                <div className={clx('action')}>
-                                                    <FontAwesomeIcon className={clx('orange-yellow', 'scale-icon')} icon={faBookOpen} />
-                                                    <label className={clx('orange-yellow')}>Read</label>
-                                                </div>
-                                                <div className={clx('action')}>
-                                                    <FontAwesomeIcon className={clx('red', 'scale-icon')} icon={faEraser} />
-                                                    <label className={clx('red')}>Remove</label>
+                                        <div className={clx('book-info')}>
+                                            <img src={book.imageUrl} className={clx('book-cover')} />
+                                            <div className={clx('description-container')}>
+                                                <label className={clx('d-title')}>DESCRIPTION</label>
+                                                <p className={clx('d-content')}>{book.description}</p>
+                                                <div className={clx('actions')}>
+                                                    <a className={clx('action')} href={book.contentUrl}>
+                                                        <FontAwesomeIcon className={clx('blue', 'scale-icon')} icon={faDownload} />
+                                                        <label className={clx('blue')}>Download</label>
+                                                    </a>
+                                                    <div className={clx('action')}>
+                                                        <FontAwesomeIcon className={clx('orange-yellow', 'scale-icon')} icon={faBookOpen} />
+                                                        <label className={clx('orange-yellow')}>Read</label>
+                                                    </div>
+                                                    <div className={clx('action')} onClick={() => removeItem(index, book.bookId)}>
+                                                        <FontAwesomeIcon className={clx('red', 'scale-icon')} icon={faEraser} />
+                                                        <label className={clx('red')}>Remove</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className={clx('record-seperator')}></div>
-                            </Fragment>
-                        ))}
-                    </div>
+                                    <div className={clx('record-seperator')}></div>
+                                </Fragment>
+                            ))}
+                        </div>)
+                        :
+                        (
+                            <div className={clx('unfound')}>
+                                <FontAwesomeIcon icon={faBoxOpen} />
+                                <label>No books found.</label>
+                            </div>
+                        )
+                    }
                 </div>
                 <div className={clx('publish-page')}>
                     <div className={clx('add-book-cover')} onClick={handleImageChoose}>
-                        <FontAwesomeIcon icon={faImage} />
-                        <label>Add a book cover</label>
-                        <input ref={imageInputRef} className={clx('hidden')} type="file" />
+                        {imgFile ?
+                            (
+                                <Fragment>
+                                    <img src={previewUrl} />
+                                    <div className={clx('clear-btn')} onClick={clearImg}>
+                                        <FontAwesomeIcon icon={faXmark} />
+                                    </div>
+                                </Fragment>
+                            ) :
+                            (
+                                <Fragment>
+                                    <FontAwesomeIcon icon={faImage} />
+                                    <label>Add a book cover</label>
+                                    <input ref={imageInputRef} accept='image/*' onChange={handleImgFileChange} className={clx('hidden')} type="file" />
+                                </Fragment>)
+                        }
                     </div>
                     <div className={clx('book-form')}>
                         <label className={clx('form-title')}>Book information</label>

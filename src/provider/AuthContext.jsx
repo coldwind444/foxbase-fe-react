@@ -135,8 +135,7 @@ export default function AuthProvider({ children }) {
                 jwt,
                 setJwt,
                 userInfo,
-                setUserInfo
-
+                setUserInfo,
             }}>
             {children}
         </AuthContext.Provider>

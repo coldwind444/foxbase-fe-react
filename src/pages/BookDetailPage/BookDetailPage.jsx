@@ -12,26 +12,15 @@ import BasicRating from '../../components/BasicRating/BasicRating'
 import { useBook } from '../../provider/BookContext'
 import { useAuth } from '../../provider/AuthContext'
 import { counting, getBookRatings, getMyRating } from '../../api/ratingApi'
-import { favoriteCheck, getBookById, getPurchasedBookIds, toggleAddToFavorites } from '../../api/bookApi'
+import { favoriteCheck, getPurchasedBookIds, toggleAddToFavorites } from '../../api/bookApi'
 import { useNavigate } from 'react-router-dom'
+import Loader from '../../components/Loader/Loader'
+import { createZaloPayOrder, getZaloPayPaymentStatus, payUsingFoxBudget } from '../../api/purchaseApi'
 
 const clx = classNames.bind(style)
 function BookDetailPage() {
-    const { id, setId, bookData, setBookData, bookLoading } = useBook()
-
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-    } = useAuth()
+    const { bookData, bookLoading, setUpdateFavorites } = useBook()
+    const { authenticated, jwt, userInfo, setUserInfo } = useAuth()
 
     const [clicked, setClicked] = useState(false)
     const [slide, setSlide] = useState(1)
@@ -41,9 +30,11 @@ function BookDetailPage() {
     const [ratings, setRatings] = useState(null)
     const [isFavorite, setIsFavorite] = useState(false)
     const [ratingsCount, setRatingsCount] = useState(0)
-    const [page, setPage] = useState(false)
     const [myRating, setMyRating] = useState(null)
     const [canRead, setCanRead] = useState(false)
+    const [zaloPayLoading, setZaloPayLoading] = useState(false)
+    const [walletLoading, setWalletLoading] = useState(false)
+    const [checking, setChecking] = useState(false)
 
     const navigate = useNavigate()
 
@@ -90,10 +81,14 @@ function BookDetailPage() {
 
     const toggleFavorite = async () => {
         try {
+            setUpdateFavorites(true)
             const response = await toggleAddToFavorites(jwt, bookData.bookId)
-            setIsFavorite(response.data.added)
+            const isAdded = response.data.added
+            setIsFavorite(isAdded)
         } catch {
             console.log("Error toggling favorite")
+        } finally {
+            setUpdateFavorites(false)
         }
     }
 
@@ -120,6 +115,84 @@ function BookDetailPage() {
         }
     }
 
+    const purchaseByWallet = async () => {
+        if (!jwt) return
+        try {
+            setWalletLoading(true)
+            const response = await payUsingFoxBudget(jwt, bookData.bookId)
+            if (response.data.success) {
+                setUserInfo(prev => ({
+                    ...prev,
+                    balance: prev.balance - bookData.price
+                }));
+                setSlide(1)
+            }
+        } catch {
+            console.log('Purchase by wallet fail.')
+        } finally {
+            setWalletLoading(false)
+        }
+    }
+
+    const checkPaymentStatus = async () => {
+        try {
+            const response = await getZaloPayPaymentStatus(jwt, bookData.bookId)
+            if (response.data.success) {
+                setSlide(1)
+                setZaloPayLoading(false)
+                setChecking(false)
+            }
+        } catch {
+            console.log('Check status fail: ')
+        }
+    }
+
+    useEffect(() => {
+        if (!checking) return 
+
+        const interval = setInterval(() => {
+            if (zaloPayLoading) {
+                checkPaymentStatus()
+            } else {
+                clearInterval(interval)
+            }
+        }, 3000)
+
+        return () => clearInterval(interval)
+    }, [checking, zaloPayLoading])
+
+
+    const purchaseByZaloPay = async () => {
+        if (!jwt) return
+        try {
+            setZaloPayLoading(true)
+            const request = {
+                amount: bookData.price,
+                item: {
+                    bookId: bookData.bookId,
+                    title: bookData.title,
+                    author: bookData.author,
+                    price: bookData.price
+                }
+            }
+            const response = await createZaloPayOrder(jwt, request)
+            if (response.data.returncode === 1) {
+                window.open(response.data.orderurl, '_blank')
+                setChecking(true)
+            }
+        } catch {
+            console.log('ZaloPay fail')
+        }
+    }
+
+    useEffect(() => {
+        if (!walletLoading) checkPuchase()
+    }, [walletLoading])
+
+    useEffect(() => {
+        if (!checking) checkPuchase()
+    }, [checking])
+
     useEffect(() => {
         if (!jwt || !bookData) return
         checkPuchase()
@@ -127,7 +200,6 @@ function BookDetailPage() {
         fetchMyRating()
         fetchBookRatings()
         fetchBookFavorite()
-        console.log(ratings)
     }, [jwt, bookData])
 
     const handleEmojiMenuClick = () => {
@@ -178,7 +250,7 @@ function BookDetailPage() {
                         </div>
                         <div className={clx({ 'add-to-fav-btn': true, 'clicked': clicked })}
                             onClick={handleFavoriteClick}>
-                            <FontAwesomeIcon className={clx({ 'heart-icon': true, 'red': isFavorite })}
+                            <FontAwesomeIcon className={clx({ 'heart-icon': true, 'pink': isFavorite })}
                                 icon={isFavorite ? faHearSolid : faHeartOutlined} />
                             <label>Add to favourites</label>
                         </div>
@@ -192,15 +264,15 @@ function BookDetailPage() {
                             <div className={clx('abstract-container')}>
                                 <label>Description</label>
                                 <div className={clx('seperator')}></div>
-                                <p>
+                                <p className={clx('description')}>
                                     {bookData.description}
                                 </p>
                             </div>
                             <div className={clx('btn-container')}>
-                                <div className={clx({ 'expanded-btn': true, 'blue-theme': bookData.price === 0, 'pink-theme': bookData.price !== 0 })}
+                                <div className={clx({ 'expanded-btn': true, 'blue-theme': canRead || bookData.price === 0, 'pink-theme': !canRead && bookData.price !== 0 })}
                                     onClick={() => handleReadClick()}>
-                                    <FontAwesomeIcon className={clx('btn-icon')} icon={bookData.price === 0 ? faDownload : faShoppingCart} />
-                                    <label>{bookData.price === 0 ? 'Download PDF' : 'Purchase now'}</label>
+                                    <FontAwesomeIcon className={clx('btn-icon')} icon={canRead || bookData.price === 0 ? faDownload : faShoppingCart} />
+                                    <label>{canRead || bookData.price === 0 ? 'Download PDF' : 'Purchase now'}</label>
                                 </div>
                                 <div className={clx('expanded-btn', 'orange-theme')}>
                                     <FontAwesomeIcon className={clx('btn-icon')} icon={faBookOpen} />
@@ -218,7 +290,7 @@ function BookDetailPage() {
                             <div className={clx('payment-methods')}>
                                 <div className={clx('expanded-selection-box', { 'selected': paymentMethod === 1 })}>
                                     <div className={clx('selection-area')}>
-                                        <input id='opt1' type='radio' name='option' checked={paymentMethod === 1} onChange={() => setPaymentMethod(1)} />
+                                        <input disabled={walletLoading} id='opt1' type='radio' name='option' checked={paymentMethod === 1} onChange={() => setPaymentMethod(1)} />
                                         <label>ZaloPay</label>
                                         <img className={clx('method-logo')} src={zaloPayLogo} />
                                     </div>
@@ -229,15 +301,18 @@ function BookDetailPage() {
                                                 <label className={clx('white-text')}>Total price:</label>
                                                 <label className={clx('green-text', 'bold', 'large-text')}>{bookData.price.toLocaleString() + "đ"}</label>
                                             </div>
-                                            <a className={clx('pay-btn', 'blue-btn')}>
+                                            <a className={clx('pay-btn', 'blue-btn')} onClick={purchaseByZaloPay}>
                                                 Go to ZaloPay gateway
                                             </a>
+                                            <div className={clx('loader-container')}>
+                                                <Loader isLoading={zaloPayLoading} type='spinner' />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className={clx('expanded-selection-box', { 'selected': paymentMethod === 2 })}>
                                     <div className={clx('selection-area')}>
-                                        <input id='opt2' type='radio' name='option' checked={paymentMethod === 2} onChange={() => setPaymentMethod(2)} />
+                                        <input disabled={zaloPayLoading} id='opt2' type='radio' name='option' checked={paymentMethod === 2} onChange={() => setPaymentMethod(2)} />
                                         <label>Foxbase budget</label>
                                         <img className={clx('method-logo')} src={foxBudgetLogo} />
                                     </div>
@@ -248,9 +323,12 @@ function BookDetailPage() {
                                                 <label className={clx('white-text')}>Total price:</label>
                                                 <label className={clx('green-text', 'bold', 'large-text')}>{bookData.price.toLocaleString() + "đ"}</label>
                                             </div>
-                                            <a className={clx('pay-btn', 'orange-btn')}>
+                                            <a className={clx('pay-btn', 'orange-btn')} onClick={purchaseByWallet}>
                                                 Confirm payment
                                             </a>
+                                            <div className={clx('loader-container')}>
+                                                <Loader isLoading={walletLoading} type='spinner' />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

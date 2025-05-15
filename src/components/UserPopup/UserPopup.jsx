@@ -11,19 +11,7 @@ import foxAvatar from '../../assets/default_avt.jpg'
 
 const clx = classNames.bind(style)
 const UserPopup = forwardRef(function UserPopup({ state }, ref) {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        loginContext,
-        setLoginContext,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-    } = useAuth()
+    const { logout, jwt, userInfo } = useAuth()
 
     const [next, setNext] = useState(false)
     const [amountString, setAmountString] = useState('0')
@@ -112,7 +100,7 @@ const UserPopup = forwardRef(function UserPopup({ state }, ref) {
                             </div>
                             <div className={clx('amount-container')}>
                                 <label className={clx('black-text')}>Total amount:</label>
-                                <label className={clx('amount-label', {'green-text': !max, 'red-text': max})}>
+                                <label className={clx('amount-label', { 'green-text': !max, 'red-text': max })}>
                                     {amountString + " VND"}
                                 </label>
                             </div>

@@ -12,19 +12,7 @@ import { useAuth } from '../../provider/AuthContext'
 const clx = classNames.bind(style)
 
 function NavBar() {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        loginContext,
-        setLoginContext,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-    } = useAuth()
+    const { authenticated, userInfo } = useAuth()
 
     const [popupState, setPopupState] = useState(false)
     const [scrolled, setScrolled] = useState(false);

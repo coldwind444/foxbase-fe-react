@@ -28,14 +28,9 @@ export const getBooksByFilterList = async (list, keyword, page, size) => {
 }
 
 
-export const getMyBooks = async (token, page, size) => {
+export const getMyBooks = async (token) => {
     const api = createApiWithToken(token)
-    const response = await api.get("/books/collection", {
-        params: {
-            page: page,
-            size: size
-        }
-    })
+    const response = await api.get("/books/collection")
     return response.data
 }
 

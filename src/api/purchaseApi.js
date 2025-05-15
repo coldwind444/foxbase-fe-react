@@ -21,7 +21,9 @@ export const purchaseToWallet = async (token, requestData) => {
 export const getZaloPayPaymentStatus = async (token, bookId) => {
     const api = createApiWithToken(token)
     const response = await api.get("/purchase/book/zalo-pay/check-status", {
-        params: bookId
+        params: {
+            bookId: bookId
+        }
     })
     return response.data
 }

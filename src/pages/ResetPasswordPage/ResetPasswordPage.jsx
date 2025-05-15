@@ -4,25 +4,9 @@ import OTPStep from './OTPStep/OTPStep'
 import EmailStep from './EmailStep/EmailStep'
 import PasswordResetStep from './PasswordResetStep/PasswordResetStep'
 import { useState } from 'react'
-import { useAuth } from '../../provider/AuthContext'
 
 const clx = classNames.bind(style)
 function ResetPasswordPage() {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-
-    } = useAuth()
-
     const [step, setStep] = useState(1)
     const [bars, setBars] = useState([true, false, false])
     const [email, setEmail] = useState('')

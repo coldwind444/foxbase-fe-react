@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 
 const clx = classNames.bind(style)
 export default function ResultPage() {
-    const { result, setResult, toResultPage, setToResultPage, keyword, setKeyWord, filters, setFilters, page, setPage } = useSearch()
+    const { result, keyword, page, setPage } = useSearch()
     
     const [pagination, setPagination] = useState([])
     const [sessionNum, setSessionNum] = useState(0)

@@ -12,20 +12,7 @@ import { useAuth } from '../../../provider/AuthContext'
 
 const clx = classNames.bind(style)
 export default function DashboardLayout() {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-
-    } = useAuth()
+    const { loading, userInfo } = useAuth()
 
     const [popupState, setPopupState] = useState(false)
     const [tab, setTab] = useState(1)

@@ -1,12 +1,90 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getBookById } from "../api/bookApi";
+import { useAuth } from "./AuthContext";
+import { getMyFavorites, getMyBooks } from '../api/bookApi'
+import { toggleAddToFavorites } from "../api/bookApi";
 
 const BookContext = createContext();
 
 export default function BookProvider({ children }) {
+    const { jwt } = useAuth()
+
     const [bookData, setBookData] = useState(null);
     const [id, setId] = useState(() => localStorage.getItem('bookId'));
     const [bookLoading, setBookLoading] = useState(false)
+    const [favorites, setFavorites] = useState([])
+    const [works, setWorks] = useState([])
+    const [fLoading, setFLoading] = useState(false)
+    const [wLoading, setWLoading] = useState(false)
+    const [isEmptyF, setIsEmptyF] = useState(true)
+    const [isEmptyW, setIsEmptyW] = useState(true)
+    const [updateFavorites, setUpdateFavorites] = useState(false)
+    const [updateWorks, setUpdateWorks] = useState(false)
+
+    const fetchFavorites = async () => {
+        try {
+            setFLoading(true)
+            const response = await getMyFavorites(jwt)
+            setFavorites(response.data)
+            console.log(response)
+        } catch {
+            console.log('Error fetching favorites')
+        } finally {
+            setFLoading(false)
+        }
+    }
+
+    const fetchWorks = async () => {
+        try {
+            setWLoading(true)
+            const response = await getMyBooks(jwt)
+            setWorks(response.data)
+        } catch {
+            console.log('Error fetching works')
+        } finally {
+            setWLoading(false)
+
+        }
+    }
+
+    const removeItem = async (index, id) => {
+        if (!jwt) return
+        try {
+            const response = await toggleAddToFavorites(jwt, id)
+            if (!response.data.isAdded) {
+                await fetchFavorites()
+            }
+        } catch {
+            console.log('Error removing from favorites')
+        }
+    }
+    
+    useEffect(() => {
+        if (jwt) {
+            fetchFavorites()
+            fetchWorks()
+        }
+    }, [jwt])
+
+    useEffect(() => {
+        if (jwt && !updateFavorites) {
+            fetchFavorites()
+        }
+    }, [updateFavorites])
+
+    useEffect(() => {
+        if (jwt) {
+            fetchWorks()
+        }
+    }, [updateWorks])
+
+    useEffect(() => {
+        if (!fLoading) setIsEmptyF(favorites.length === 0)
+    }, [favorites])
+
+    useEffect(() => {
+        if (!wLoading) setIsEmptyF(works.length === 0)
+    }, [works])
 
     useEffect(() => {
         if (id) {
@@ -34,7 +112,28 @@ export default function BookProvider({ children }) {
     }, [id]);
 
     return (
-        <BookContext.Provider value={{ id, setId, bookData, setBookData, bookLoading }}>
+        <BookContext.Provider value={
+            {
+                id,
+                setId,
+                bookData,
+                setBookData,
+                bookLoading,
+                favorites,
+                setFavorites,
+                works,
+                setWorks,
+                isEmptyF,
+                setIsEmptyF,
+                isEmptyW,
+                setIsEmptyW,
+                fLoading,
+                wLoading,
+                removeItem,
+                setUpdateFavorites,
+                setUpdateFavorites,
+                setUpdateWorks
+            }}>
             {children}
         </BookContext.Provider>
     );

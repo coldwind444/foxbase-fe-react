@@ -10,20 +10,7 @@ import { useAuth } from '../../../provider/AuthContext'
 
 const clx = classNames.bind(style)
 function PasswordResetStep({ setStep, setBars, username, token }) {
-    const {
-        authenticated,
-        userRegister,
-        login,
-        logout,
-        loading,
-        message,
-        setMessage,
-        jwt,
-        setJwt,
-        userInfo,
-        setUserInfo
-
-    } = useAuth()
+    const { logout, jwt } = useAuth()
 
     const [password, setPassword] = useState('')
     const [confirm, setConfirm] = useState('')

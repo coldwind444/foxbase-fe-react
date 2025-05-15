@@ -15,20 +15,7 @@ import { Messages } from '../../components/FoxCharacter/FoxCharacter'
 const clx = classNames.bind(style)
 
 function LoginPage() {
-    const {
-        authenticated,
-            userRegister,
-            login,
-            logout,
-            loading,
-            message,
-            setMessage,
-            jwt,
-            setJwt,
-            userInfo,
-            setUserInfo
-
-    } = useAuth()
+    const { login, loading, setMessage } = useAuth()
 
 
     const [username, setUsername] = useState('')
