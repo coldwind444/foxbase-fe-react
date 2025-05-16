@@ -26,7 +26,6 @@ export default function BookProvider({ children }) {
             setFLoading(true)
             const response = await getMyFavorites(jwt)
             setFavorites(response.data)
-            console.log(response)
         } catch {
             console.log('Error fetching favorites')
         } finally {
@@ -130,7 +129,6 @@ export default function BookProvider({ children }) {
                 fLoading,
                 wLoading,
                 removeItem,
-                setUpdateFavorites,
                 setUpdateFavorites,
                 setUpdateWorks
             }}>

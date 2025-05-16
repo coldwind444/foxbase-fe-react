@@ -5,12 +5,16 @@ import { faArrowLeft, faBookOpen, faBoxOpen, faDownload, faEraser, faImage, faLe
 import RateStars from '../../components/RateStars/RateStars'
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../provider/AuthContext'
-import { useLocation } from 'react-router-dom'
 import { useBook } from '../../provider/BookContext'
+import { uploadImage } from '../../api/cloudApi'
+import { publishBook } from '../../api/bookApi'
+import Loader from '../../components/Loader/Loader'
 
 const clx = classNames.bind(style)
 export default function WorkPage({ type }) {
-    const { loading, userInfo } = useAuth()
+    const { loading, userInfo, jwt } = useAuth()
+
+    const formRef = useRef()
 
     const {
         favorites,
@@ -25,10 +29,10 @@ export default function WorkPage({ type }) {
         removeItem
     } = useBook()
 
-    const fileInputRef = useRef()
     const [imgFile, setImgFile] = useState(null)
+    const [contentUrl, setContentUrl] = useState()
     const [previewUrl, setPreviewUrl] = useState(null)
-    const [fileName, setFileName] = useState('No file chosen')
+    const [pbloading, setPbLoading] = useState(false)
 
     const [tab, setTab] = useState(1)
     const [title, setTitle] = useState('')
@@ -42,30 +46,54 @@ export default function WorkPage({ type }) {
 
     const imageInputRef = useRef(null)
 
-    const handleFileChoose = () => {
-        fileInputRef.current.click()
-    }
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        setFileName(file ? file.name : "No file chosen");
-    }
-
     const handleImageChoose = () => {
         imageInputRef.current.click()
     }
 
     const handleImgFileChange = (e) => {
         const file = e.target.files[0];
-        setImgFile(file ? file.name : null)
+        setImgFile(file)
 
         const objectUrl = URL.createObjectURL(file);
         setPreviewUrl(objectUrl);
     }
 
     const clearImg = () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl)
         setImgFile(null)
         setPreviewUrl(null)
+    }
+
+    const handlePublish = async () => {
+        if (!jwt) return
+        if (!title || !imgFile || !contentUrl || !firstName || !lastName || !genre || !description) {
+            alert("Please fill out all required fields.")
+            return
+        }
+        try {
+            setPbLoading(true)
+            const imgUrl = await uploadImage(imgFile)
+
+            const request = {
+                title: title,
+                author: firstName + ' ' + lastName,
+                description: description,
+                contentUrl: contentUrl,
+                imageUrl: imgUrl,
+                genre: genre,
+                price: price.length === 0 ? 0 : price
+            }
+
+            const response = await publishBook(request, jwt)
+            if (response.status === 200){
+                alert('Publish book success')
+                formRef.current.reset()
+            }
+        } catch (err) {
+            console.log('Error publish', err)
+        } finally {
+            setPbLoading(false)
+        }
     }
 
     useEffect(() => {
@@ -79,7 +107,13 @@ export default function WorkPage({ type }) {
     useEffect(() => {
         if (type === 1 && !fLoading) setIsEmptyF(favorites.length === 0)
         if (type === 2 && !wLoading) setIsEmptyW(works.length === 0)
-    }, [type])
+    }, [type, fLoading, wLoading, favorites, works])
+
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl)
+        }
+    }, [previewUrl])
 
     if (loading || userInfo === null) return (<div></div>)
 
@@ -96,7 +130,7 @@ export default function WorkPage({ type }) {
             </div>
             <div className={clx('slider', { 'next': tab === 2 && type === 2 })}>
                 <div className={clx('book-list')}>
-                    <div className={clx('header-container')}>
+                    <div className={clx('header-container', { 'hidden': tab === 2 && type === 2})}>
                         <div className={clx('table-head')}>
                             <label className={clx('column-label', 'id-space')}>Publish ID</label>
                             <label className={clx('column-label', 'title-space')}>Title</label>
@@ -109,7 +143,7 @@ export default function WorkPage({ type }) {
                     {!(type === 1 ? isEmptyF : isEmptyW) ?
                         (<div className={clx('list')}>
                             {!(type === 1 ? fLoading : wLoading) && (type === 1 ? favorites : works).map((book, index) => (
-                                <Fragment key={index}>
+                                <Fragment key={book.bookId}>
                                     <div className={clx('book-record', { 'expanded': book.isExpanded })} onClick={() => {
                                         setFavorites(prevfavorites =>
                                             prevfavorites.map((b, i) =>
@@ -186,34 +220,34 @@ export default function WorkPage({ type }) {
                     <div className={clx('book-form')}>
                         <label className={clx('form-title')}>Book information</label>
                         <div className={clx('form-seperator')} />
-                        <form>
+                        <form ref={formRef}>
                             <div className={clx('input-area')}>
                                 <label className={clx('input-title')}>Title:</label>
                                 <div className={clx('input-box', 'long')}>
-                                    <input id='title-box_asdiw' type='text' placeholder='Give your book a fantastic title !' required
+                                    <input id='title-box_asdiw' type='text'
+                                        placeholder='Give your book a fantastic title !' required
                                         onChange={(e) => setTitle(e.target.value)} />
                                     <label className={clx('textbox-counter', { 'red': titleCount > 80 })} htmlFor="title-box_asdiw">{`${titleCount}/80`}</label>
                                 </div>
                             </div>
                             <div className={clx('input-area')}>
-                                <label className={clx('input-title')}>File (PDF):</label>
+                                <label className={clx('input-title')}>Public URL to your content:</label>
                                 <div className={clx('file-input-box', 'long')}>
-                                    <div className={clx('open-dialog-btn')} onClick={handleFileChoose}>
-                                        <FontAwesomeIcon icon={faPaperclip} />
-                                    </div>
-                                    <input id='file-box_asd2' type='file' ref={fileInputRef} required hidden
-                                        onChange={(e) => handleFileChange(e)} />
-                                    <label htmlFor='file-box_asd2'>{fileName}</label>
+                                    <input className={clx('url-box')} id='file-box_asd2' type='text' required
+                                            onChange={(e) => setContentUrl(e.target.value)} 
+                                            placeholder='For example: https://mydomain/file.pdf'/>
                                 </div>
                             </div>
                             <div className={clx('input-area')}>
                                 <label className={clx('input-title')}>Author:</label>
                                 <div className={clx('name-input-area')}>
                                     <div className={clx('input-box', 'medium')}>
-                                        <input type='text' placeholder='First name' required />
+                                        <input type='text' placeholder='First name' required value={firstName}
+                                            onChange={(e) => setFirstName(e.target.value)} />
                                     </div>
                                     <div className={clx('input-box', 'medium')}>
-                                        <input type='text' placeholder='Last name' required />
+                                        <input type='text' placeholder='Last name' required value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)} />
                                     </div>
                                 </div>
                             </div>
@@ -221,37 +255,35 @@ export default function WorkPage({ type }) {
                                 <div className={clx('input-area')}>
                                     <label className={clx('input-title')}>Genre:</label>
                                     <div className={clx('input-box', 'short')}>
-                                        <input type='text' placeholder='What is the genre of your book ?' required />
+                                        <input type='text' placeholder='What is the genre of your book ?' required
+                                            value={genre}
+                                            onChange={(e) => setGenre(e.target.value)} />
                                     </div>
                                 </div>
                                 <div className={clx('input-area')}>
                                     <label className={clx('input-title')}>Price:</label>
                                     <div className={clx('input-box', 'very-short')}>
-                                        <input type='text' placeholder='Sell it ?' required />
-                                    </div>
-                                </div>
-                                <div className={clx('radio-area')}>
-                                    <div className={clx('option')}>
-                                        <input type="radio" name='opt' id='free' />
-                                        <label htmlFor="free">Free</label>
-                                    </div>
-                                    <div className={clx('option')}>
-                                        <input type="radio" name='opt' id='cost' />
-                                        <label htmlFor="cost">Cost</label>
+                                        <input type='text' placeholder='Sell it ?' required
+                                            onChange={(e) => setPrice(e.target.value)}
+                                            value={price} />
                                     </div>
                                 </div>
                             </div>
                             <div className={clx('input-area')}>
                                 <label className={clx('input-title')}>Description:</label>
                                 <div className={clx('multiline-box', 'long')}>
-                                    <textarea required id='textarea_314asd' rows='4' cols='75' placeholder='Write a short description about your book...'
-                                        onChange={(e) => setDescription(e.target.value)} />
+                                    <textarea required id='textarea_314asd' rows='4' cols='100'
+                                        placeholder='Write a short description about your book...'
+                                        onChange={(e) => setDescription(e.target.value)}/>
                                     <label className={clx('textarea-counter', { 'red': titleCount > 300 })} htmlFor="textarea_314asd">{`${descriptionCount}/300`}</label>
                                 </div>
                             </div>
-                            <button className={clx('publish-btn')} type='submit'>
+                            <button className={clx('publish-btn')} type='button' onClick={handlePublish}>
                                 Publish
                             </button>
+                            <div className={clx('loader-container')}>
+                                <Loader type='spinner' isLoading={pbloading}/>
+                            </div>
                         </form>
                     </div>
                 </div>
