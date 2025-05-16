@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getBookById } from "../api/bookApi";
+import { getBookById, removeWork } from "../api/bookApi";
 import { useAuth } from "./AuthContext";
 import { getMyFavorites, getMyBooks } from '../api/bookApi'
 import { toggleAddToFavorites } from "../api/bookApi";
@@ -57,6 +57,18 @@ export default function BookProvider({ children }) {
             console.log('Error removing from favorites')
         }
     }
+
+    const removeMyWork = async (index, id) => {
+        if (!jwt) return
+        try {
+            const response = await removeWork(jwt, id)
+            if (response.data){
+                await fetchWorks()
+            }
+        } catch {
+            console.log('Error removing work.')
+        }
+    }
     
     useEffect(() => {
         if (jwt) {
@@ -72,7 +84,7 @@ export default function BookProvider({ children }) {
     }, [updateFavorites])
 
     useEffect(() => {
-        if (jwt) {
+        if (jwt && !updateWorks) {
             fetchWorks()
         }
     }, [updateWorks])
@@ -129,6 +141,7 @@ export default function BookProvider({ children }) {
                 fLoading,
                 wLoading,
                 removeItem,
+                removeMyWork,
                 setUpdateFavorites,
                 setUpdateWorks
             }}>

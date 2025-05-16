@@ -27,6 +27,11 @@ export const getBooksByFilterList = async (list, keyword, page, size) => {
     return response.data
 }
 
+export const removeWork = async (token, id) => {
+    const api = createApiWithToken(token)
+    const response = await api.delete(`/books/${id}`)
+    return response.data
+}
 
 export const getMyBooks = async (token) => {
     const api = createApiWithToken(token)

@@ -20,13 +20,16 @@ export default function WorkPage({ type }) {
         favorites,
         setFavorites,
         works,
+        setWorks,
         isEmptyF,
         setIsEmptyF,
         isEmptyW,
         setIsEmptyW,
         fLoading,
         wLoading,
-        removeItem
+        removeItem,
+        removeMyWork,
+        setUpdateWorks
     } = useBook()
 
     const [imgFile, setImgFile] = useState(null)
@@ -45,6 +48,14 @@ export default function WorkPage({ type }) {
     const [description, setDescription] = useState('')
 
     const imageInputRef = useRef(null)
+
+    const handleRemove = (index, id) => {
+        if (type === 1){
+            removeItem(index, id)
+        } else {
+            removeMyWork(index, id)
+        }
+    }
 
     const handleImageChoose = () => {
         imageInputRef.current.click()
@@ -72,6 +83,7 @@ export default function WorkPage({ type }) {
         }
         try {
             setPbLoading(true)
+            setUpdateWorks(true)
             const imgUrl = await uploadImage(imgFile)
 
             const request = {
@@ -85,13 +97,17 @@ export default function WorkPage({ type }) {
             }
 
             const response = await publishBook(request, jwt)
-            if (response.status === 200){
+            if (response.statusCode === 0) {
                 alert('Publish book success')
                 formRef.current.reset()
+                clearImg()
+                setTitleCount(0)
+                setDescriptionCount(0)
             }
         } catch (err) {
             console.log('Error publish', err)
         } finally {
+            setUpdateWorks(false)
             setPbLoading(false)
         }
     }
@@ -130,7 +146,7 @@ export default function WorkPage({ type }) {
             </div>
             <div className={clx('slider', { 'next': tab === 2 && type === 2 })}>
                 <div className={clx('book-list')}>
-                    <div className={clx('header-container', { 'hidden': tab === 2 && type === 2})}>
+                    <div className={clx('header-container', { 'hidden': tab === 2 && type === 2 })}>
                         <div className={clx('table-head')}>
                             <label className={clx('column-label', 'id-space')}>Publish ID</label>
                             <label className={clx('column-label', 'title-space')}>Title</label>
@@ -145,11 +161,19 @@ export default function WorkPage({ type }) {
                             {!(type === 1 ? fLoading : wLoading) && (type === 1 ? favorites : works).map((book, index) => (
                                 <Fragment key={book.bookId}>
                                     <div className={clx('book-record', { 'expanded': book.isExpanded })} onClick={() => {
-                                        setFavorites(prevfavorites =>
-                                            prevfavorites.map((b, i) =>
-                                                i === index ? { ...b, isExpanded: !b.isExpanded } : b
-                                            )
-                                        );
+                                        if (type === 1) {
+                                            setFavorites(prevfavorites =>
+                                                prevfavorites.map((b, i) =>
+                                                    i === index ? { ...b, isExpanded: !b.isExpanded } : b
+                                                )
+                                            );
+                                        } else {
+                                            setWorks(prevworks =>
+                                                prevworks.map((b, i) =>
+                                                    i === index ? { ...b, isExpanded: !b.isExpanded } : b
+                                                )
+                                            );
+                                        }
                                     }}>
                                         <div className={clx('record-info')}>
                                             <label className={clx('record-label', 'record-id-space')}>{book.bookId}</label>
@@ -177,7 +201,7 @@ export default function WorkPage({ type }) {
                                                         <FontAwesomeIcon className={clx('orange-yellow', 'scale-icon')} icon={faBookOpen} />
                                                         <label className={clx('orange-yellow')}>Read</label>
                                                     </div>
-                                                    <div className={clx('action')} onClick={() => removeItem(index, book.bookId)}>
+                                                    <div className={clx('action')} onClick={() => handleRemove(index, book.bookId)}>
                                                         <FontAwesomeIcon className={clx('red', 'scale-icon')} icon={faEraser} />
                                                         <label className={clx('red')}>Remove</label>
                                                     </div>
@@ -234,19 +258,19 @@ export default function WorkPage({ type }) {
                                 <label className={clx('input-title')}>Public URL to your content:</label>
                                 <div className={clx('file-input-box', 'long')}>
                                     <input className={clx('url-box')} id='file-box_asd2' type='text' required
-                                            onChange={(e) => setContentUrl(e.target.value)} 
-                                            placeholder='For example: https://mydomain/file.pdf'/>
+                                        onChange={(e) => setContentUrl(e.target.value)}
+                                        placeholder='For example: https://mydomain/file.pdf' />
                                 </div>
                             </div>
                             <div className={clx('input-area')}>
                                 <label className={clx('input-title')}>Author:</label>
                                 <div className={clx('name-input-area')}>
                                     <div className={clx('input-box', 'medium')}>
-                                        <input type='text' placeholder='First name' required value={firstName}
+                                        <input type='text' placeholder='First name' required
                                             onChange={(e) => setFirstName(e.target.value)} />
                                     </div>
                                     <div className={clx('input-box', 'medium')}>
-                                        <input type='text' placeholder='Last name' required value={lastName}
+                                        <input type='text' placeholder='Last name' required
                                             onChange={(e) => setLastName(e.target.value)} />
                                     </div>
                                 </div>
@@ -256,7 +280,6 @@ export default function WorkPage({ type }) {
                                     <label className={clx('input-title')}>Genre:</label>
                                     <div className={clx('input-box', 'short')}>
                                         <input type='text' placeholder='What is the genre of your book ?' required
-                                            value={genre}
                                             onChange={(e) => setGenre(e.target.value)} />
                                     </div>
                                 </div>
@@ -264,8 +287,7 @@ export default function WorkPage({ type }) {
                                     <label className={clx('input-title')}>Price:</label>
                                     <div className={clx('input-box', 'very-short')}>
                                         <input type='text' placeholder='Sell it ?' required
-                                            onChange={(e) => setPrice(e.target.value)}
-                                            value={price} />
+                                            onChange={(e) => setPrice(e.target.value)} />
                                     </div>
                                 </div>
                             </div>
@@ -274,7 +296,7 @@ export default function WorkPage({ type }) {
                                 <div className={clx('multiline-box', 'long')}>
                                     <textarea required id='textarea_314asd' rows='4' cols='100'
                                         placeholder='Write a short description about your book...'
-                                        onChange={(e) => setDescription(e.target.value)}/>
+                                        onChange={(e) => setDescription(e.target.value)} />
                                     <label className={clx('textarea-counter', { 'red': titleCount > 300 })} htmlFor="textarea_314asd">{`${descriptionCount}/300`}</label>
                                 </div>
                             </div>
@@ -282,7 +304,7 @@ export default function WorkPage({ type }) {
                                 Publish
                             </button>
                             <div className={clx('loader-container')}>
-                                <Loader type='spinner' isLoading={pbloading}/>
+                                <Loader type='spinner' isLoading={pbloading} />
                             </div>
                         </form>
                     </div>

@@ -21,7 +21,7 @@ export const getMyRating = async (token, bookId) => {
     return response.data
 }
 
-export const rate = async (token, requestData) => {
+export const rateThisBook = async (token, requestData) => {
     const api = createApiWithToken(token)
     const response = await api.post("/ratings/rate", requestData)
     return response.data

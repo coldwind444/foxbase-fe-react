@@ -11,7 +11,7 @@ import foxBudgetLogo from '../../assets/foxb.png'
 import BasicRating from '../../components/BasicRating/BasicRating'
 import { useBook } from '../../provider/BookContext'
 import { useAuth } from '../../provider/AuthContext'
-import { counting, getBookRatings, getMyRating } from '../../api/ratingApi'
+import { counting, getBookRatings, getMyRating, rateThisBook } from '../../api/ratingApi'
 import { favoriteCheck, getPurchasedBookIds, toggleAddToFavorites } from '../../api/bookApi'
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../components/Loader/Loader'
@@ -35,6 +35,7 @@ function BookDetailPage() {
     const [zaloPayLoading, setZaloPayLoading] = useState(false)
     const [walletLoading, setWalletLoading] = useState(false)
     const [checking, setChecking] = useState(false)
+    const [rate, setRate] = useState(0)
 
     const navigate = useNavigate()
 
@@ -42,10 +43,31 @@ function BookDetailPage() {
         try {
             const response = await getMyRating(jwt, bookData.bookId)
             const rating = response.data
-            console.log(rating)
             setMyRating(rating)
         } catch {
             console.log("Error fetching my rating")
+        }
+    }
+
+    const handleRating = (value) => {
+        setRate(value)
+    }
+
+    const rateBook = async () => {
+        if (!jwt) return
+        try {
+            const request = {
+                ratedBookId: bookData.bookId,
+                rate: rate,
+                comment: comment
+            }
+
+            const res = await rateThisBook(jwt, request)
+            if (res.statusCode === 0){
+                await fetchMyRating()
+            }
+        } catch {
+            console.log('Error rating book.')
         }
     }
 
@@ -302,7 +324,7 @@ function BookDetailPage() {
                                                 <label className={clx('green-text', 'bold', 'large-text')}>{bookData.price.toLocaleString() + "đ"}</label>
                                             </div>
                                             <a className={clx('pay-btn', 'blue-btn')} onClick={purchaseByZaloPay}>
-                                                Go to ZaloPay gateway
+                                                        Go to ZaloPay gateway
                                             </a>
                                             <div className={clx('loader-container')}>
                                                 <Loader isLoading={zaloPayLoading} type='spinner' />
@@ -338,11 +360,11 @@ function BookDetailPage() {
                 </div>
             </div>
             {authenticated && <div className={clx('comment-area')}>
-                {false ? (
+                {!myRating ? (
                     <div className={clx('user-comment')}>
                         <div className={clx('rate-container')}>
                             <label className={clx('rate-label')}>Rate this book:</label>
-                            <BasicRating />
+                            <BasicRating value={rate} onChange={handleRating}/>
                         </div>
                         <div className={clx('comment-box')}>
                             <div className={clx('first-section')}>
@@ -359,7 +381,7 @@ function BookDetailPage() {
                                     onChange={(e) => setComment(e.target.value)} />
                             </div>
                             <div className={clx('btn-section')}>
-                                <div className={clx('submit-btn')}>Submit</div>
+                                <div className={clx('submit-btn')} onClick={rateBook}>Submit</div>
                             </div>
                         </div>
                         <div className={clx('emoji-container')}>
@@ -379,10 +401,11 @@ function BookDetailPage() {
                     {ratings ? ratings.map((item, index) => (
                         <Comment key={index} myComment={false} rating={item} avatarUrl={item.creatorAvatar} fname={item.creatorFName} lname={item.creatorLName} />
                     )) : (<div></div>)}
+                    {ratings && 
                     <div className={clx('see-more')}>
                         <label>See more</label>
                         <FontAwesomeIcon icon={faChevronDown} />
-                    </div>
+                    </div>}
                 </div>
             </div>}
         </div>

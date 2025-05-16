@@ -15,8 +15,15 @@ const StyledRating = styled(Rating)({
   },
 });
 
-export default function BasicRating() {
-  const [value, setValue] = React.useState(3);
+export default function BasicRating({ value : initialValue = 3, onChange }) {
+  const [value, setValue] = React.useState(initialValue);
+
+  const handleChange = (event, newVal) => {
+    setValue(newVal)
+      if (onChange){
+          onChange(newVal)
+      }
+  }
 
   return (
     <Box>
@@ -25,9 +32,7 @@ export default function BasicRating() {
         size="large"
         precision={0.5}
         value={value}
-        onChange={(event, newValue) => {
-          setValue(newValue);
-        }}
+        onChange={handleChange}
       />
     </Box>
   );
