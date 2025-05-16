@@ -4,7 +4,7 @@ import EmojiPicker from 'emoji-picker-react'
 import style from './BookDetailPage.module.css'
 import classNames from 'classnames/bind'
 import { faHeart as faHeartOutlined } from '@fortawesome/free-regular-svg-icons'
-import { faFeather, faStar, faClipboardList, faDownload, faHeart as faHearSolid, faBookOpen, faShoppingCart, faArrowRight, faArrowLeft, faFaceSmile, faChevronDown, faBook } from '@fortawesome/free-solid-svg-icons'
+import { faFeather, faStar, faClipboardList, faDownload, faHeart as faHearSolid, faBookOpen, faShoppingCart, faArrowRight, faArrowLeft, faFaceSmile, faChevronDown, faBook, faChevronUp, faComment, faCommenting } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState } from 'react'
 import zaloPayLogo from '../../assets/zaloPay.png'
 import foxBudgetLogo from '../../assets/foxb.png'
@@ -36,8 +36,17 @@ function BookDetailPage() {
     const [walletLoading, setWalletLoading] = useState(false)
     const [checking, setChecking] = useState(false)
     const [rate, setRate] = useState(0)
+    const [ratingLoading, setRatingLoading] = useState(false)
+    const [ratingDisplayNum, setRatingDisplayNum] = useState(5)
 
     const navigate = useNavigate()
+
+    const updateInteractions = (usn, bid, likes, dislikes, loves) => {
+        setRatings(prevRts =>
+            prevRts.map((rt, i) => (usn === rt.creatorUsername && bid === rt.ratedBookId) ?
+                { ...rt, likes: likes, dislikes: dislikes, loves: loves } : rt)
+        )
+    }
 
     const fetchMyRating = async () => {
         try {
@@ -56,6 +65,7 @@ function BookDetailPage() {
     const rateBook = async () => {
         if (!jwt) return
         try {
+            setRatingLoading(true)
             const request = {
                 ratedBookId: bookData.bookId,
                 rate: rate,
@@ -63,11 +73,13 @@ function BookDetailPage() {
             }
 
             const res = await rateThisBook(jwt, request)
-            if (res.statusCode === 0){
+            if (res.statusCode === 0) {
                 await fetchMyRating()
             }
         } catch {
             console.log('Error rating book.')
+        } finally {
+            setRatingLoading(false)
         }
     }
 
@@ -170,7 +182,7 @@ function BookDetailPage() {
     }
 
     useEffect(() => {
-        if (!checking) return 
+        if (!checking) return
 
         const interval = setInterval(() => {
             if (zaloPayLoading) {
@@ -222,7 +234,7 @@ function BookDetailPage() {
         fetchMyRating()
         fetchBookRatings()
         fetchBookFavorite()
-    }, [jwt, bookData])
+    }, [jwt, bookData, bookLoading])
 
     const handleEmojiMenuClick = () => {
         setEmojiOpen(prev => !prev)
@@ -324,7 +336,7 @@ function BookDetailPage() {
                                                 <label className={clx('green-text', 'bold', 'large-text')}>{bookData.price.toLocaleString() + "đ"}</label>
                                             </div>
                                             <a className={clx('pay-btn', 'blue-btn')} onClick={purchaseByZaloPay}>
-                                                        Go to ZaloPay gateway
+                                                Go to ZaloPay gateway
                                             </a>
                                             <div className={clx('loader-container')}>
                                                 <Loader isLoading={zaloPayLoading} type='spinner' />
@@ -364,7 +376,7 @@ function BookDetailPage() {
                     <div className={clx('user-comment')}>
                         <div className={clx('rate-container')}>
                             <label className={clx('rate-label')}>Rate this book:</label>
-                            <BasicRating value={rate} onChange={handleRating}/>
+                            <BasicRating value={rate} onChange={handleRating} />
                         </div>
                         <div className={clx('comment-box')}>
                             <div className={clx('first-section')}>
@@ -382,6 +394,9 @@ function BookDetailPage() {
                             </div>
                             <div className={clx('btn-section')}>
                                 <div className={clx('submit-btn')} onClick={rateBook}>Submit</div>
+                                <div className={clx('rloader-container')}>
+                                    <Loader isLoading={ratingLoading} type='spinner' />
+                                </div>
                             </div>
                         </div>
                         <div className={clx('emoji-container')}>
@@ -393,19 +408,40 @@ function BookDetailPage() {
                         </div>
                     </div>
                 ) : (
-                    <Comment myComment={true} rating={myRating} avatarUrl={userInfo.avatarUrl} fname={userInfo.fname} lname={userInfo.lname} />
+                    <Comment myComment={true} rating={myRating} updateInteractions={updateInteractions}
+                        avatarUrl={userInfo.avatarUrl} fname={userInfo.fname} lname={userInfo.lname} />
                 )}
                 <div className={clx('cmt-seperator')}></div>
                 <h3>Ratings</h3>
                 <div className={clx('comments')}>
-                    {ratings ? ratings.map((item, index) => (
-                        <Comment key={index} myComment={false} rating={item} avatarUrl={item.creatorAvatar} fname={item.creatorFName} lname={item.creatorLName} />
+                    {ratings ? (ratings.filter((item, index) => index < ratingDisplayNum)).map((item, index) => (
+                        <Comment key={index} myComment={false} rating={item} avatarUrl={item.creatorAvatar}
+                            fname={item.creatorFName} lname={item.creatorLName}
+                            updateInteractions={updateInteractions} />
                     )) : (<div></div>)}
-                    {ratings && 
-                    <div className={clx('see-more')}>
-                        <label>See more</label>
-                        <FontAwesomeIcon icon={faChevronDown} />
-                    </div>}
+                    { myRating ?
+                        (ratings.length > 5 &&
+                        <div className={clx('pagination-controls')}>
+                            <div className={clx('see-more')} onClick={() => setRatingDisplayNum(prev => prev + 5)}>
+                                <label>See more</label>
+                                <FontAwesomeIcon icon={faChevronDown} />
+                            </div>
+                            <div className={clx('see-less')} onClick={() => setRatingDisplayNum(5)}>
+                                <label>See less</label>
+                                <FontAwesomeIcon icon={faChevronUp} />
+                            </div>
+                        </div>)
+                        :
+                        (<div></div>)
+                    }
+                    {ratings ?
+                        (ratings.length === 0 &&
+                            <div className={clx('empty')}>
+                                <FontAwesomeIcon icon={faCommenting} />
+                                <label>No other ratings found.</label>
+                            </div>) :
+                        (<div></div>)
+                    }
                 </div>
             </div>}
         </div>

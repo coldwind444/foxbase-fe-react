@@ -8,6 +8,12 @@ export const interact = async (token, requestData) => {
 
 export const countInteractionsOfOneRating = async (token, requestData) => {
     const api = createApiWithToken(token)
-    const response = await api.get("/interactions/count", requestData)
+    const response = await api.post("/interactions/count", requestData)
+    return response.data
+}
+
+export const getUserInteraction = async (token, request) => {
+    const api = createApiWithToken(token)
+    const response = await api.post('/interactions/get', request)
     return response.data
 }
