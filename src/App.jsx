@@ -11,6 +11,7 @@ import ExploreLayout from './components/Layout/ExploreLayout/ExploreLayout'
 import ExplorePage from './pages/ExplorePage/ExplorePage'
 import ResultPage from './pages/ResultPage/ResultPage'
 import { useEffect } from 'react'
+import OAuth2SuccessPage from './pages/OAuth2SuccessPage/OAuth2SuccessPage'
 
 function App() {
   const location = useLocation();
@@ -23,6 +24,7 @@ function App() {
     <div>
         <Routes>
           <Route path='/' element={<DefaultLayout><BooksPage/></DefaultLayout>}/>
+          <Route path='/oauth2-success' element={<OAuth2SuccessPage/>}/>
           <Route path='/auth/login' element={<AuthLayout context='login'><LoginPage/></AuthLayout>}/>
           <Route path='/auth/signin' element={<AuthLayout context='signup'><SigninPage/></AuthLayout>}/>
           <Route path='/auth/reset-password' element={<AuthLayout context='reset'><ResetPasswordPage/></AuthLayout>}/>
