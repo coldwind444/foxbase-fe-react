@@ -1,12 +1,48 @@
-# React + Vite
+# 📚 Foxbase Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the **Foxbase** frontend repository! This project is the user interface for **Foxbase**, a web application where users can read ebooks, share their own written works, and connect with a community of readers and authors.
 
-Currently, two official plugins are available:
+Built with **React** and powered by **Vite** for lightning-fast development and builds.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- 🔍 Browse and search a library of ebooks
+- 📝 Upload and share your own writings
+- ❤️ Favorite books and manage your personal reading list
+- ⭐ Rate and review content from other users
+- 💸 Purchase premium books via ZaloPay
+- 📱 User-friendly UI
+
+---
+
+## 🛠️ Tech Stack
+
+- **React** – Component-based UI
+- **Vite** – Fast build tool and dev server
+- **React Router** – Client-side routing
+- **Axios / Fetch API** – Data fetching
+- **Context API** – Global state management
+- **CSS Modules** *(optional)* – Styling
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/coldwind444/foxbase-fe-react.git
+cd foxbase-fe-react
+
+# Install dependencies
+npm install
+# or
+yarn install
