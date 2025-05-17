@@ -1,4 +1,8 @@
-# 📚 Foxbase Frontend
+<h1 align="left">
+  <img src="https://github.com/coldwind444/foxbase-fe-react/blob/master/public/fox.png?raw=true" alt="Foxbase Logo" width="40" style="vertical-align: middle; margin-right: 10px;" />
+  Foxbase Frontend
+</h1>
+
 
 Welcome to the **Foxbase** frontend repository! This project is the user interface for **Foxbase**, a web application where users can read ebooks, share their own written works, and connect with a community of readers and authors.
 
